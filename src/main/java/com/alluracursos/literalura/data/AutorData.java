@@ -3,25 +3,22 @@ package com.alluracursos.literalura.data;
 import com.alluracursos.literalura.model.Autor;
 import jakarta.persistence.*;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "AUTORDATA")
 public class AutorData {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    @Column(unique = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long Id;
+    @Column(unique = false)
     private String nombre;
     private Integer fechaNacimiento;
     private Integer fechaFallecimiento;
-    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL )
-    @JoinTable(
-            name = "libro_autor",
-            joinColumns = @JoinColumn(name = "autordata_id",referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "librodata_id",referencedColumnName = "id")
-    )
-    private List<LibroData> listaLibroData;
+    @ManyToMany(mappedBy = "listaAutorData",cascade =CascadeType.ALL,fetch = FetchType.EAGER)
+    private Set<LibroData> listaLibroData = new HashSet<>();
 
     public AutorData() {
     }
@@ -56,11 +53,23 @@ public class AutorData {
         this.fechaFallecimiento = fechaFallecimiento;
     }
 
-    public void setLibros(List<LibroData> libroData){
-        this.listaLibroData = libroData;
+    public Set<LibroData> getListaLibroData() {
+        return listaLibroData;
     }
 
-    public List<LibroData> getListaLibroData() {
-        return listaLibroData;
+    public void setListaLibroData(Set<LibroData> listaLibroData) {
+        this.listaLibroData = listaLibroData;
+    }
+
+    @Override
+    public String toString() {
+        String libros = listaLibroData.stream().
+                map(libro -> "\"" + libro.getTitulo() + "\"").
+                collect(Collectors.joining("; "));
+
+        return "Nombre: '" + nombre + '\'' + '\n'+
+                "Fecha de nacimiento: " + fechaNacimiento + '\n'+
+                "Fecha de fallecimiento: " + fechaFallecimiento + '\n'+
+                "Libros: " + libros;
     }
 }

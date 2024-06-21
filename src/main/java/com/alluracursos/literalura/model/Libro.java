@@ -1,9 +1,11 @@
 package com.alluracursos.literalura.model;
 
+import com.alluracursos.literalura.data.AutorData;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Libro(
