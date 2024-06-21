@@ -26,7 +26,6 @@ public class Main {
         this.autorRepository = autorRepository;
     }
 
-
     public void mostrarMenu(){
         String opc;
         do {
@@ -64,7 +63,7 @@ public class Main {
                     listarLibrosPorIdioma();
                     break;
                 case "0":
-                    System.out.println("Saliendo de la aplicaion. Gracias.");
+                    System.out.println("Saliendo de la aplicación. Gracias.");
                     break;
                 default:
                     System.out.println("Opción inválida");
@@ -74,11 +73,7 @@ public class Main {
 
     @Transactional
     private void buscarLibroPorTituloYAgregarlo() {
-        System.out.println("Escriba el nombre del libro");
-        String nombre = scanner.next();
-        String resultadosJson = consumoGutendex.obtenerDatos(nombre);
-
-        var resultados = convierteDatos.obtenerDatos(resultadosJson, Resultados.class);
+        Resultados resultados = obtenerDatosGutendexApi();
 
         resultados.libros().forEach(libro -> {
             try {
@@ -102,9 +97,9 @@ public class Main {
 
     private void listarAutoresRegistrados() {
         List<AutorData> autorDataList = autorRepository.findAll();
-        List<AutorData> autorDataNoRepetido = condensarAutores(autorDataList);
+        autorDataList = condensarAutores(autorDataList);
 
-        autorDataNoRepetido.forEach(this::imprimirAutores);
+        autorDataList.forEach(this::imprimirAutores);
     }
 
     private void listarAutoresVivosEnDeterminadoAnio() {
@@ -117,11 +112,33 @@ public class Main {
         autoresVivosEnDeterminadoAnio = condensarAutores(autoresVivosEnDeterminadoAnio);
 
         if (!autoresVivosEnDeterminadoAnio.isEmpty()) autoresVivosEnDeterminadoAnio.forEach(this::imprimirAutores);
-
+        else System.out.println("No se encontraron autores en el año proporcionado");
     }
 
     private void listarLibrosPorIdioma() {
+        String idioma;
 
+        do {
+            System.out.println("Escriba el idioma en el cual desea buscar los libros");
+            System.out.println("(Ingles, Español, Frances, Portugues o Finlandés):");
+            idioma = scanner.next();
+
+            idioma = switch (idioma.toLowerCase()) {
+                case "ingles", "inglés", "en", "in" -> "en";
+                case "español", "es" -> "es";
+                case "frances", "francés", "fr" -> "fr";
+                case "portugues", "portugués", "pt" -> "pt";
+                case "finlandés", "finlandes", "fi" -> "fi";
+                default -> "";
+            };
+
+            if (idioma.isBlank()) System.out.println("Idioma no válido, inténtelo de nuevo.");
+
+        } while (idioma.isBlank());
+
+        List<LibroData> libroDataList = libroRepository.findByListaLenguajes(idioma);
+
+        libroDataList.forEach(this::imprimirLibro);
     }
 
     private void imprimirLibro(LibroData libroData){
@@ -140,14 +157,20 @@ public class Main {
         Map<String, AutorData> autorDataMap = new HashMap<>();
 
         for (AutorData autor : autorDataList) {
-            if (autorDataMap.containsKey(autor.getNombre())) {
-                AutorData existingAutor = autorDataMap.get(autor.getNombre());
-                existingAutor.getListaLibroData().addAll(autor.getListaLibroData());
-            } else {
-                autorDataMap.put(autor.getNombre(), autor);
-            }
+            //Si el Map ya contiene el autor agrega el libro a su lista, sino agrega el autor al Map
+            if (autorDataMap.containsKey(autor.getNombre()))
+                autorDataMap.get(autor.getNombre()).getListaLibroData().addAll(autor.getListaLibroData());
+            else autorDataMap.put(autor.getNombre(), autor);
         }
         return new ArrayList<>(autorDataMap.values());
+    }
+
+    private Resultados obtenerDatosGutendexApi() {
+        System.out.println("Escriba el nombre del libro");
+        String nombre = scanner.next();
+        String resultadosJson = consumoGutendex.obtenerDatos(nombre);
+
+        return convierteDatos.obtenerDatos(resultadosJson, Resultados.class);
     }
 
 }

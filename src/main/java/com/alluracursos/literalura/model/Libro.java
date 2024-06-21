@@ -1,11 +1,9 @@
 package com.alluracursos.literalura.model;
 
-import com.alluracursos.literalura.data.AutorData;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
-import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Libro(
@@ -17,28 +15,4 @@ public record Libro(
 
 
 ) {
-    @Override
-    public Integer id() {
-        return id;
-    }
-
-    @Override
-    public String titulo() {
-        return titulo;
-    }
-
-    @Override
-    public List<Autor> autores() {
-        return autores;
-    }
-
-    @Override
-    public List<String> lenguajes() {
-        return lenguajes;
-    }
-
-    @Override
-    public Integer numeroDeDescargas() {
-        return numeroDeDescargas;
-    }
 }

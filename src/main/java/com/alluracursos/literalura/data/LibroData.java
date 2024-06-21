@@ -3,6 +3,7 @@ package com.alluracursos.literalura.data;
 import com.alluracursos.literalura.model.Libro;
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ public class LibroData {
             inverseJoinColumns = @JoinColumn(name = "libro_Id", referencedColumnName = "Id")
     )
     private Set<AutorData> listaAutorData;
-    private String lenguajes;
+    private List<String> listaLenguajes;
     private Integer numeroDeDescargas;
 
     public LibroData() {
@@ -32,7 +33,7 @@ public class LibroData {
     public LibroData(Libro libro) {
         this.libroDataId = libro.id();
         this.titulo = libro.titulo();
-        this.lenguajes = String.join(", ", libro.lenguajes());
+        this.listaLenguajes = libro.lenguajes();
         this.numeroDeDescargas = libro.numeroDeDescargas();
         this.listaAutorData = libro.autores().stream().map(AutorData::new).collect(Collectors.toSet());
     }
@@ -54,12 +55,12 @@ public class LibroData {
         this.titulo = titulo;
     }
 
-    public String getLenguajes() {
-        return lenguajes;
+    public List<String> getLenguajes() {
+        return listaLenguajes;
     }
 
-    public void setLenguajes(String lenguajes) {
-        this.lenguajes = lenguajes;
+    public void setLenguajes(List<String> lenguajes) {
+        this.listaLenguajes = lenguajes;
     }
 
     public Integer getNumeroDeDescargas() {
@@ -92,9 +93,13 @@ public class LibroData {
                 map(autor -> "\"" + autor.getNombre() + "\"").
                 collect(Collectors.joining("; "));
 
+        String lenguajes = listaLenguajes.stream().
+                map(lenguaje -> "\"" + lenguaje + "\"").
+                collect(Collectors.joining("; "));
+
         return "Titulo: '" + titulo + '\'' + '\n'+
                 "Autor:" + "[" + autores + "]" + '\n'+
-                "Lenguajes:'" + lenguajes + '\'' + '\n'+
+                "Lenguajes:" + "[" + lenguajes + "]" + '\n'+
                 "Descargas:" + numeroDeDescargas;
     }
 }
